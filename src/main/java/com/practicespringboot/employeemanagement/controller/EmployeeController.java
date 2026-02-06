@@ -35,8 +35,6 @@ public class EmployeeController {
     public Employee update(@PathVariable long id,
                            @Valid @RequestBody EmployeeUpdateRequest req) {
 
-        Employee updated = employeeService.updateEmployee(id, req);
-
-        return updated;
+        return employeeService.updateEmployee(id, req);
     }
 }
