@@ -1,8 +1,10 @@
 package com.practicespringboot.employeemanagement.service;
 
+import com.practicespringboot.employeemanagement.dto.EmployeeUpdateRequest;
 import com.practicespringboot.employeemanagement.dto.OnBoardingRequest;
 import com.practicespringboot.employeemanagement.entity.Employee;
 import com.practicespringboot.employeemanagement.repository.EmployeeRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,7 +26,7 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
-    public Employee OnboardEmployee(OnBoardingRequest req) {
+    public Employee onboardEmployee(OnBoardingRequest req) {
 
         Employee employee = new Employee();
 
@@ -41,5 +43,37 @@ public class EmployeeService {
         employee.setJobTitle(req.getJobTitle().trim());
 
         return employeeRepository.save(employee);
+    }
+
+    public Employee updateEmployee(Long id, EmployeeUpdateRequest req) {
+
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+
+        String newEmail = req.getEmail().trim().toLowerCase();
+        String currentEmail = employee.getEmail() == null ? null : employee.getEmail().trim().toLowerCase();
+
+        if(currentEmail == null || !currentEmail.equals(newEmail)) {
+            if(employeeRepository.existsByEmail(newEmail)) {
+
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
+            }
+
+            employee.setEmail(newEmail);
+        }
+
+        employee.setFirstName(req.getFirstName().trim());
+        employee.setLastName(req.getLastName().trim());
+        employee.setJobTitle(req.getJobTitle().trim());
+
+        try {
+
+            return employeeRepository.save(employee);
+
+        } catch (DataIntegrityViolationException e) {
+
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
+        }
     }
 }
