@@ -76,4 +76,14 @@ public class EmployeeService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
     }
+
+    public void deleteEmployee(long id) {
+
+        if(!employeeRepository.existsById(id)) {
+
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+        }
+
+        employeeRepository.deleteById(id);
+    }
 }
